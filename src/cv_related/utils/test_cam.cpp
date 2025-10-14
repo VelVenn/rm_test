@@ -1,3 +1,5 @@
+// This code is used to test the connection to the camera on WSL
+
 #include <opencv2/opencv.hpp>
 
 using namespace cv;

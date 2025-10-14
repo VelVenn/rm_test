@@ -1,3 +1,5 @@
+// This code is used to check if OpenCV is configured correctly
+
 #include <opencv2/opencv.hpp>
 
 using namespace cv;

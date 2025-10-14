@@ -1,3 +1,5 @@
+// This code is used to get images for the camera calibration process
+
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
