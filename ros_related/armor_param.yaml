@@ -1,4 +1,0 @@
-/armor_finder:
-  ros__parameters:
-    enemy_color: "blue"
-    model_path: "/home/tuas/projekt/CV2/my_armor_detect/build/res/armor_numbers.xml"
