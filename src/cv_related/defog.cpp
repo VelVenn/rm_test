@@ -117,24 +117,24 @@ Mat dehaze(const Mat& src, const Mat& transmittance, const Vec3f& atmLight, cons
 
 int main(int argc, char* argv[])
 {
-    Mat image = imread("../res/Fog.png");
+    Mat image;
+
+    if (argc >= 2) {
+        try {
+            image = imread(argv[1]);
+        } catch (const cv::Exception& e) {
+            cerr << e.msg << endl;
+            return -1;
+        }
+    } else {
+        cout << "Please provide an image path." << endl;
+        return -1;
+    }
 
     if (image.empty()) {
         cout << "Could not open or find the image!" << endl;
         return -1;
     }
-
-    // if (argc >= 2) {
-    //     try {
-    //         image = imread(argv[1]);
-    //     } catch (const cv::Exception& e) {
-    //         cerr << e.msg << endl;
-    //         return -1;
-    //     }
-    // } else {
-    //     cout << "Please provide an image path." << endl;
-    //     return -1;
-    // }
 
     namedWindow("Dark Channel", WINDOW_NORMAL);
     namedWindow("transmittance", WINDOW_NORMAL);

@@ -16,6 +16,9 @@ target_link_libraries(color_matcher PRIVATE ${OpenCV_LIBS})
 add_executable(mouse_event mouse_event.cpp)
 target_link_libraries(mouse_event PRIVATE ${OpenCV_LIBS})
 
+add_executable(recorder recorder.cpp)
+target_link_libraries(recorder PRIVATE ${OpenCV_LIBS})
+
 add_executable(apple_detect apple_detect.cpp)
 target_link_libraries(apple_detect PRIVATE ${OpenCV_LIBS})
 
