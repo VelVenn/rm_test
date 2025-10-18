@@ -111,9 +111,8 @@
 其它实现细节请参阅源码。
 
 - 运行效果：<br/>
-<p align="center">
-  <video src="./asset/vid/mouse-event.mp4" width="920" controls></video>
-</p>
+
+https://github.com/user-attachments/assets/84076adb-0769-4d0e-943d-e71d3e29beb1
 
 #### _应用题_
 #### 4.4 苹果检测
