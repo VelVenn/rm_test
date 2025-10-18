@@ -39,7 +39,7 @@
     │   ├── recorder.cpp      # 视频录制
     │   ├── res               # cv_related 中代码运行时用得到的一些资源
     │   └── utils             # 杂项代码，用于调试OpenCV的配置
-    └── ros_related
+    └── ros_related # ROS 工作空间 
         ├── res                    # armor_pipeline 功能包中节点运行时用得到的一些资源
         │   └── pipe_params.yaml   # armor_pipeline 功能包中节点的参数
         └── src
@@ -67,7 +67,7 @@
 ### 2. C++应用题
 见 [armor.cpp](./src/cv_related/armor.cpp)
 ### 3. ROS2基本应用
-> 工作空间：[`src/ros_related`](./src/ros_related/) <br/> 功能包：[`demo_pub`](./src/ros_related/src/demo_pub/) (发布者) 、[`demo_sub`](./src/ros_related/src/demo_sub/) (订阅者)
+> 工作空间：[src/ros_related](./src/ros_related/) <br/> 功能包：[demo_pub](./src/ros_related/src/demo_pub/) (发布者) 、[demo_sub](./src/ros_related/src/demo_sub/) (订阅者)
 #### 3.1 话题的设计
 这两个功能包中的节点分别发布与订阅两个话题：`rand_px` (原数据类型为`cv::Mat`)、`sim_str` (原数据类型为`std::string`)。<br/>
 `rand_px` 话题传输的数据类型为 `sensor_msgs::msg::Image`；发布节点使用 `cv_bridge::CvImage::toImageMsg()` 将 `cv::Mat` 转换为该消息并发布，订阅节点则通过 `cv_bridge::toCvCopy()` 将接收到的 `Image` 转回 `cv::Mat` 以供后续处理。<br/>
@@ -77,6 +77,31 @@
 #### 3.3 原始数据的可视化
 [`demo_sub.cpp`](./src/ros_related/src/demo_sub/src/demo_sub.cpp) 中定义了订阅节点 `MinimalCVSubscriber`， 该节点中两个用于储存原数据的成员的定义与 `MinimalCVPublisher` 中的完全相同。该节点仅对 `raw_image_` 进行了可视化，通过 `cv::imshow()` 函数；`raw_string_` 则直接在控制台中输出。
 #### 3.4 参数
-上述的两个节点没有定义任何参数，但 [`armor_pipeline`](./src/ros_related/src/armor_pipeline/) 功能包中的节点都定义了一些参数，详见 [某一节]()。
+上述的两个节点没有定义任何参数，但 [`armor_pipeline`](./src/ros_related/src/armor_pipeline/) 功能包中的节点都定义了一些参数，详见 [某一节]()。<!-- TODO: finish the explanation of armor_pipline -->
+### 4. OpenCV
+#### _基础题_
+#### 4.1 色彩分割
+> source: [color_matcher.cpp](./src/cv_related/color_matcher.cpp)
+
+该程序先将原图转换为 HSV 空间，然后利用 `cv::inRange()` 获得仅保留红色块的掩膜 `cv::Mat red_mask`。对 `red_mask` 进行 Canny 边缘检测后利用 `cv::findContours()` 获得所有的外部轮廓。过滤掉过小的轮廓后，在原图上绘制出来并对检测结果进行保存。
+- 样例检测结果：<br/>
+  ![color match res](./asset/pic/RedContours.png)
+#### 4.2 视频录制
+> source: [recoder.cpp](./src/cv_related/recorder.cpp)
+
+1. 摄像头的连接：<br/>
+由于我使用的开发环境是基于WSL的，连接摄像头是个相对麻烦的事情。我是通过 `usbipd` 将宿主机上的摄像头附加到WSL上的，具体方法参见 [usbipd-win WSL Support](https://github.com/dorssel/usbipd-win/wiki/WSL-support)。
+> [!CAUTION] 
+> 需要将WSL更新至最新版本来支持摄像头，否则可能要重新编译WSL内核来实现相关支持
+
+2. 关于摄像头：<br/>
+我使用的摄像头是笔记本内置的，故没有实现调节曝光。其它实现细节请参阅源码。
+#### 4.3 鼠标事件
+> source: [mouse_event.cpp](./src/cv_related/mouse_event.cpp)
+
+
+
+
+#### _应用题_
 
 
