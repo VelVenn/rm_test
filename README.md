@@ -114,6 +114,8 @@
 
 https://github.com/user-attachments/assets/84076adb-0769-4d0e-943d-e71d3e29beb1
 
+[下载视频](./asset/vid/mouse-event.mp4)
+
 #### _应用题_
 #### 4.4 苹果检测
 
