@@ -111,9 +111,9 @@
 其它实现细节请参阅源码。
 
 - 运行效果：<br/>
-  <video controls width="960">
-    <source src="./asset/vid/mouse-event.mp4" type="video/mp4">
-  </video>
+<p align="center">
+  <video src="./asset/vid/mouse-event.mp4" width="920" controls></video>
+</p>
 
 #### _应用题_
 #### 4.4 苹果检测
