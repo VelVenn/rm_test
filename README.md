@@ -24,6 +24,7 @@
 
 ``` 
 .
+├── .clang-format
 ├── README.md
 ├── 赛事知识题.md
 ├── asset
@@ -75,9 +76,12 @@
 #### 3.2 原始数据的生成
 [`demo_pub.cpp`](./src/ros_related/src/demo_pub/src/demo_pub.cpp) 中定义了发布节点 `MininalCVPublisher`，该节点中包含两个用于储存原数据的成员： `cv::Mat raw_image_` 与 `std::string raw_str_`。`raw_image_` 的尺寸为 480 x 640，图像内容通过 `cv::randu()` 随机生成。`raw_str_` 的内容则在节点构造时确定。 
 #### 3.3 原始数据的可视化
-[`demo_sub.cpp`](./src/ros_related/src/demo_sub/src/demo_sub.cpp) 中定义了订阅节点 `MinimalCVSubscriber`， 该节点中两个用于储存原数据的成员的定义与 `MinimalCVPublisher` 中的完全相同。该节点仅对 `raw_image_` 进行了可视化，通过 `cv::imshow()` 函数；`raw_string_` 则直接在控制台中输出。
+[`demo_sub.cpp`](./src/ros_related/src/demo_sub/src/demo_sub.cpp) 中定义了订阅节点 `MinimalCVSubscriber`， 该节点中两个用于储存原数据的成员的定义与 `MinimalCVPublisher` 中的完全相同。该节点仅对 `raw_image_` 进行了可视化，通过 `cv::imshow()` 实现；`raw_string_` 则直接在控制台中输出。
 #### 3.4 参数
 上述的两个节点没有定义任何参数，但 [`armor_pipeline`](./src/ros_related/src/armor_pipeline/) 功能包中的节点都定义了一些参数，详见 [某一节]()。<!-- TODO: finish the explanation of armor_pipline -->
+#### 3.5 运行效果
+![demo node running](./asset/pic/ros_topic.png)
+
 ### 4. OpenCV
 #### _基础题_
 #### 4.1 色彩分割
@@ -96,12 +100,22 @@
 
 2. 关于摄像头：<br/>
 我使用的摄像头是笔记本内置的，故没有实现调节曝光。其它实现细节请参阅源码。
+- 录制出的视频：<br/>
+![test vid](./asset/vid/test.gif) 
+
 #### 4.3 鼠标事件
 > source: [mouse_event.cpp](./src/cv_related/mouse_event.cpp)
 
+该源码中定义了 `RoiSelector` 类来实现鼠标事件的响应与 ROI 提取。类成员函数 `reactor()` 中具体定义了程序响应鼠标事件的行为，并通过静态类成员函数 `callback()` 来实现 `reactor()` 对 静态转发，以符合 `cv::setOnMouseCallack()` 对回调函数的签名。
 
+其它实现细节请参阅源码。
 
+- 运行效果：<br/>
+  <video controls width="960">
+    <source src="./asset/vid/mouse-event.mp4" type="video/mp4">
+  </video>
 
 #### _应用题_
+#### 4.4 苹果检测
 
 
