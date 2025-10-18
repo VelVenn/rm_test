@@ -1,18 +1,26 @@
 cmake_minimum_required(VERSION 3.8)
-project(str_topic)
+project(demo_pub)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(image_transport REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(OpenCV REQUIRED)
+
+add_executable(demo_pub_node src/demo_pub.cpp)
+ament_target_dependencies(demo_pub_node rclcpp cv_bridge image_transport sensor_msgs std_msgs OpenCV)
+
+install(TARGETS
+  demo_pub_node
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -27,19 +35,3 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
-
-add_executable(str_pub src/str_pub.cpp)
-ament_target_dependencies(str_pub rclcpp std_msgs)
-
-install(TARGETS
-  str_pub
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-add_executable(str_sub src/str_sub.cpp)
-ament_target_dependencies(str_sub rclcpp std_msgs)
-
-install(TARGETS
-  str_sub
-  DESTINATION lib/${PROJECT_NAME}
-)

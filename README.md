@@ -45,8 +45,8 @@
         └── src
             ├── armor_detect   # ROS无关的装甲检测算法库，用colcon打包
             ├── armor_pipeline # 装甲检测节点
-            ├── cv_topic       # 原数据类型为cv::Mat的图像话题
-            └── str_topic      # 原数据类型为std::string的字符串话题
+            ├── demo_pub       # 发布原数据类型为cv::Mat与std::string话题的节点
+            └── demo_sub       # 订阅原数据类型为cv::Mat与std::string话题的节点
 
 ```
 ## 考核完成度
@@ -61,3 +61,9 @@
         - 能量机关识别：未完成
 5. 深度学习：未完成
 ## 考核完成思路
+### 1. 赛事知识题
+见 [赛事知识题.md](赛事知识题.md) 
+### 2. C++应用题
+见 [armor.cpp](./src/cv_related/armor.cpp)
+### 3. ROS2基本应用
+

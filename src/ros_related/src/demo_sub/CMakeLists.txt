@@ -1,18 +1,29 @@
 cmake_minimum_required(VERSION 3.8)
-project(cv_topic)
+project(demo_sub)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(cv_bridge REQUIRED)
-find_package(image_transport REQUIRED)
-find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
+
+add_executable(demo_sub_node src/demo_sub.cpp)
+ament_target_dependencies(demo_sub_node rclcpp std_msgs sensor_msgs cv_bridge OpenCV)
+
+install(TARGETS
+  demo_sub_node
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -25,20 +36,5 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
-
-add_executable(testcv src/testcv.cpp)
-ament_target_dependencies(testcv OpenCV)
-
-add_executable(cv_pub src/cv_pub.cpp)
-ament_target_dependencies(cv_pub rclcpp cv_bridge sensor_msgs OpenCV)
-
-add_executable(cv_sub src/cv_sub.cpp)
-ament_target_dependencies(cv_sub rclcpp cv_bridge sensor_msgs OpenCV)
-
-install(TARGETS
-  cv_pub
-  cv_sub
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 ament_package()
