@@ -36,7 +36,7 @@ int main()
 	vector<vector<Point>> contours;
 	vector<Vec4i>         hierarchy;
 	findContours(
-		canny_output, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE
+		red_mask, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE
 	);
 
 	vector<vector<Point>> filtered_contours;

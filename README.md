@@ -80,28 +80,34 @@
 #### 3.4 参数
 上述的两个节点没有定义任何参数，但 [`armor_pipeline`](./src/ros_related/src/armor_pipeline/) 功能包中的节点都定义了一些参数，详见 [某一节]()。<!-- TODO: finish the explanation of armor_pipline -->
 #### 3.5 运行效果
-![demo node running](./asset/pic/ros_topic.png)
+<center>
+  <img src="./asset/pic/ros_topic.png">
+</center>
 
 ### 4. OpenCV
 #### _基础题_
 #### 4.1 色彩分割
 > source: [color_matcher.cpp](./src/cv_related/color_matcher.cpp)
 
-该程序先将原图转换为 HSV 空间，然后利用 `cv::inRange()` 获得仅保留红色块的掩膜 `cv::Mat red_mask`。对 `red_mask` 进行 Canny 边缘检测后利用 `cv::findContours()` 获得所有的外部轮廓。过滤掉过小的轮廓后，在原图上绘制出来并对检测结果进行保存。
+该程序先将原图转换为 HSV 空间，然后利用 `cv::inRange()` 获得仅保留红色块的掩膜 `cv::Mat red_mask`。对 `red_mask` 分别进行 Canny 边缘检测与外部轮廓检测（`cv::findContours()`）。过滤掉过小的轮廓后，在原图上绘制出来并对检测结果进行保存。
 - 样例检测结果：<br/>
-  ![color match res](./asset/pic/RedContours.png)
+  <center>
+    <img src="./asset/pic/RedContours.png">
+  </center>
 #### 4.2 视频录制
 > source: [recoder.cpp](./src/cv_related/recorder.cpp)
 
 1. 摄像头的连接：<br/>
-由于我使用的开发环境是基于WSL的，连接摄像头是个相对麻烦的事情。我是通过 `usbipd` 将宿主机上的摄像头附加到WSL上的，具体方法参见 [usbipd-win WSL Support](https://github.com/dorssel/usbipd-win/wiki/WSL-support)。
+由于我使用的开发环境是基于WSL的，连接摄像头是个相对麻烦的事情。我是通过 `usbipd` 将宿主机上的摄像头附加到 WSL 上的，具体方法参见 [usbipd-win WSL Support](https://github.com/dorssel/usbipd-win/wiki/WSL-support)。
 > [!CAUTION] 
 > 需要将WSL更新至最新版本来支持摄像头，否则可能要重新编译WSL内核来实现相关支持
 
 2. 关于摄像头：<br/>
 我使用的摄像头是笔记本内置的，故没有实现调节曝光。其它实现细节请参阅源码。
 - 录制出的视频：<br/>
-![test vid](./asset/vid/test.gif) 
+  <center>
+    <img src="./asset/vid/test.gif">
+  </center>
 
 #### 4.3 鼠标事件
 > source: [mouse_event.cpp](./src/cv_related/mouse_event.cpp)
@@ -118,5 +124,15 @@ https://github.com/user-attachments/assets/84076adb-0769-4d0e-943d-e71d3e29beb1
 
 #### _应用题_
 #### 4.4 苹果检测
+> source: [apple_detect.cpp](./src/cv_related/apple_detect.cpp)
 
+该程序的检测原理与 [4.1](#41-色彩分割) 中的类似，但是不进行 Canny 检测，且在获得掩膜前对图像进行了高斯模糊处理，同时在进行 `cv::findContours()` 前先对掩膜进行了一些形态学处理，以去除图片中的噪点，使得检测出来的轮廓更加平滑。然后从面积以及圆度 ( $\mathrm{Circularity} = 4 \pi S / C^2 \quad C \Leftrightarrow \mathrm{Perimeter}$ ) 对获得轮廓进行过滤，最后对目标轮廓执行 `cv::boundingRect()` 来获得它们的外部边框，并在原图中绘制出来。
+
+该源码使用一个函数 `HSV_calib()`，通过创建滑条来手动确定 HSV 的大致范围。来源：[如何检测色彩边缘](https://harry-hhj.github.io/posts/RM-Tutorial-3-Getting-Started-with-OpenCV/#4%E8%A1%A5%E5%85%85%E6%A3%80%E6%B5%8B%E9%A2%9C%E8%89%B2%E8%BE%B9%E7%BC%98) 
+
+- 样例检测结果：<br>
+
+
+#### 4.5 相机标定
+> source: [calibration.cpp](./src/cv_related/calibration.cpp)
 
