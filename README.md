@@ -234,6 +234,7 @@ https://github.com/user-attachments/assets/84076adb-0769-4d0e-943d-e71d3e29beb1
 
 - __运行效果__
 
+https://github.com/user-attachments/assets/f4ff74d0-82ea-4081-9515-4c4e7632360b
 
   [下载视频](./asset/vid/pipeline_test.mp4)
 
