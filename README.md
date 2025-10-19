@@ -25,6 +25,7 @@
 ``` 
 .
 ├── .clang-format
+├── LICENSE
 ├── README.md
 ├── 赛事知识题.md
 ├── asset
@@ -74,11 +75,11 @@
 `rand_px` 话题传输的数据类型为 `sensor_msgs::msg::Image`；发布节点使用 `cv_bridge::CvImage::toImageMsg()` 将 `cv::Mat` 转换为该消息并发布，订阅节点则通过 `cv_bridge::toCvCopy()` 将接收到的 `Image` 转回 `cv::Mat` 以供后续处理。<br/>
 `sim_str` 话题传输的数据类型为 `std_msgs::msg::String`；该类型可以直接与`std::string`进行互相转换。
 #### 3.2 原始数据的生成
-[`demo_pub.cpp`](./src/ros_related/src/demo_pub/src/demo_pub.cpp) 中定义了发布节点 `MininalCVPublisher`，该节点中包含两个用于储存原数据的成员： `cv::Mat raw_image_` 与 `std::string raw_str_`。`raw_image_` 的尺寸为 480 x 640，图像内容通过 `cv::randu()` 随机生成。`raw_str_` 的内容则在节点构造时确定。 
+[`demo_pub.cpp`](./src/ros_related/src/demo_pub/src/demo_pub.cpp) 中定义了发布节点 `MininalCVPublisher`，该节点中包含两个用于储存原数据的成员： `cv::Mat raw_image_` 与 `std::string raw_str_`。`raw_image_` 的尺寸为 640 x 480，图像内容通过 `cv::randu()` 随机生成。`raw_str_` 的内容则在节点构造时确定。 
 #### 3.3 原始数据的可视化
 [`demo_sub.cpp`](./src/ros_related/src/demo_sub/src/demo_sub.cpp) 中定义了订阅节点 `MinimalCVSubscriber`， 该节点中两个用于储存原数据的成员的定义与 `MinimalCVPublisher` 中的完全相同。该节点仅对 `raw_image_` 进行了可视化，通过 `cv::imshow()` 实现；`raw_string_` 则直接在控制台中输出。
 #### 3.4 参数
-上述的两个节点没有定义任何参数，但 [`armor_pipeline`](./src/ros_related/src/armor_pipeline/) 功能包中的节点都定义了一些参数，详见 [某一节]()。<!-- TODO: finish the explanation of armor_pipline -->
+上述的两个节点没有定义任何参数，但 [`armor_pipeline`](./src/ros_related/src/armor_pipeline/) 功能包中的节点都定义了一些参数，详见 [4.6](#46-装甲板识别)。<!--TODO: link to more detailed part -->
 #### 3.5 运行效果
 <p align="center">
   <img src="./asset/pic/ros_topic.png">
@@ -126,15 +127,39 @@ https://github.com/user-attachments/assets/84076adb-0769-4d0e-943d-e71d3e29beb1
 #### 4.4 苹果检测
 > source: [apple_detect.cpp](./src/cv_related/apple_detect.cpp)
 
-该程序的检测原理与 [4.1](#41-色彩分割) 中的类似，但是不进行 Canny 检测，且在获得掩膜前对图像进行了高斯模糊处理，同时在进行 `cv::findContours()` 前先对掩膜进行了一些形态学处理，以去除图片中的噪点，使得检测出来的轮廓更加平滑。然后从面积以及圆度 ( $\mathrm{Circularity} = 4 \pi S / C^2 \quad C \Leftrightarrow \mathrm{Perimeter}$ ) 对获得轮廓进行过滤，最后对目标轮廓执行 `cv::boundingRect()` 来获得它们的外部边框，并在原图中绘制出来。
+该程序的检测原理与 [4.1](#41-色彩分割) 中的类似，但是不进行 Canny 检测，且在获得掩膜前对图像进行了高斯模糊处理，同时在进行 `cv::findContours()` 前先对掩膜进行了一些形态学处理，以去除图片中的噪点，使得检测出来的轮廓更加平滑。然后从面积以及圆度 ( $\mathrm{Circularity} = 4 \pi S / P^2 \quad P \Leftrightarrow \mathrm{Perimeter}$ ) 对获得轮廓进行过滤，最后对目标轮廓执行 `cv::boundingRect()` 来获得它们的外部边框，并在原图中绘制出来。
 
 该源码使用一个函数 `HSV_calib()`，通过创建滑条来手动确定 HSV 的大致范围。来源：[如何检测色彩边缘](https://harry-hhj.github.io/posts/RM-Tutorial-3-Getting-Started-with-OpenCV/#4%E8%A1%A5%E5%85%85%E6%A3%80%E6%B5%8B%E9%A2%9C%E8%89%B2%E8%BE%B9%E7%BC%98) 
 
-- 样例检测结果：<br>
+该程序原先尝试使用 Haar 级联分类器来进行识别 ( 来源：[使用OpenCV中的分类器和颜色识别的苹果位置识别](https://blog.csdn.net/qq_40624111/article/details/118698092) )， 可惜测试样例中的苹果存在一定的遮挡，导致该分类器的识别命中率非常低。我也尝试过利用 OpenCV 官方提供的 [train_hog.cpp](https://docs.opencv.org/4.11.0/d0/df8/samples_2cpp_2train_HOG_8cpp-example.html) 来训练模型，但是由于训练集选的不太合适导致效果同样不是很好。
+
+- 样例检测结果：<br/>
   <p align="center">
     <img width=540 src="./asset/pic/apple_finded.png">
   </p>
 
 #### 4.5 相机标定
-> source: [calibration.cpp](./src/cv_related/calibration.cpp)
+> source: [calibration.cpp](./src/cv_related/calibration.cpp) <br/> 
+> 参考：1. [基于OpenCV的相机标定](https://blog.csdn.net/LuohenYJ/article/details/104697062) 
+> 2. [OpenCV 相机标定（实现以及标定流程)](https://www.cnblogs.com/ybqjymy/p/15930982.html)
+
+1. 棋盘格图像的获取<br/>
+   为了保证标定时所使用的照片的相机参数与实际录像时的相机参数是一致的，我设计了一个简单的[小程序](./src/cv_related/utils/get_pic.cpp)。它通过 OpenCV 的 `cv::videoCapture()` 来截取50张尺寸为 960 x 540 的图片，再从中挑选出15-20张成像清晰的以供相机标定程序使用。
+
+2. 相机的标定<br/>
+   对于选定的一组照片，程序先通过 `cv::findChessboardCorners()` 寻找图片中棋盘的角点，并用 `cv::cornerSubPix()` 对这些角点的位置进行进一步的校正。之后利用 `cv::calibrateCamera()` 根据获得的所有角点与校正后角点对应的三维坐标来获得相机的内、外参与畸变系数，最后通过 `cv::FileStorage` 将这些参数保存到 [.yml](./src/cv_related/res/calib.yml) 文件中以便后续的使用。 
+
+#### _赛事题_
+#### 4.6 装甲板识别
+> 工作空间：[src/ros_related](./src/ros_related/) <br/> 
+> 功能包：[armor_detect](./src/ros_related/src/armor_detect/) (ROS无关的装甲检测算法库)、[armor_pipeline](./src/ros_related/src/armor_pipeline/) (图像获取与装甲检测节点) <br/>
+> 节点运行时所需要的资源：[ros_related/res](./src/ros_related/res/)
+
+- armor_detect
+> 参考：
+> 1. 装甲检测：[吉林大学 TARS-GO 战队 2020 年视觉代码](https://github.com/QunShanHe/JLURoboVision)
+> 2. 数字识别：[华中科技大学狼牙战队 2022 年步兵视觉](https://github.com/XianMengxi/AutoAim_HUST)
+
+
+- armor_pipeline
 
