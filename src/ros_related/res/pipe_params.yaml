@@ -1,10 +1,10 @@
 /armor_finder:
   ros__parameters:
-    enemy_color: "blue"
+    enemy_color: "red"
     model_path: "./res/armor_numbers.xml"
 
 /frame_capture:
   ros__parameters:
-    vid_path: ""
+    vid_path: "./res/pic/red_test.png"
     playing: false
     loop_display: false

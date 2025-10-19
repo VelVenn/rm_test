@@ -79,7 +79,7 @@
 #### 3.3 原始数据的可视化
 [`demo_sub.cpp`](./src/ros_related/src/demo_sub/src/demo_sub.cpp) 中定义了订阅节点 `MinimalCVSubscriber`， 该节点中两个用于储存原数据的成员的定义与 `MinimalCVPublisher` 中的完全相同。该节点仅对 `raw_image_` 进行了可视化，通过 `cv::imshow()` 实现；`raw_string_` 则直接在控制台中输出。
 #### 3.4 参数
-上述的两个节点没有定义任何参数，但 [`armor_pipeline`](./src/ros_related/src/armor_pipeline/) 功能包中的节点都定义了一些参数，详见 [4.6](#46-装甲板识别)。<!--TODO: link to more detailed part -->
+上述的两个节点没有定义任何参数，但 [`armor_pipeline`](./src/ros_related/src/armor_pipeline/) 功能包中的节点都定义了一些参数，详见 [4.6](#design_of_params)。<!--TODO: link to more detailed part -->
 #### 3.5 运行效果
 <p align="center">
   <img src="./asset/pic/ros_topic.png">
@@ -152,14 +152,89 @@ https://github.com/user-attachments/assets/84076adb-0769-4d0e-943d-e71d3e29beb1
 #### _赛事题_
 #### 4.6 装甲板识别
 > 工作空间：[src/ros_related](./src/ros_related/) <br/> 
-> 功能包：[armor_detect](./src/ros_related/src/armor_detect/) (ROS无关的装甲检测算法库)、[armor_pipeline](./src/ros_related/src/armor_pipeline/) (图像获取与装甲检测节点) <br/>
+> 功能包：[armor_detect](./src/ros_related/src/armor_detect/) (ROS无关的装甲检测库)、[armor_pipeline](./src/ros_related/src/armor_pipeline/) (图像获取与装甲检测节点) <br/>
 > 节点运行时所需要的资源：[ros_related/res](./src/ros_related/res/)
 
-- armor_detect
+- __armor_detect__
 > 参考：
 > 1. 装甲检测：[吉林大学 TARS-GO 战队 2020 年视觉代码](https://github.com/QunShanHe/JLURoboVision)
 > 2. 数字识别：[华中科技大学狼牙战队 2022 年步兵视觉](https://github.com/XianMengxi/AutoAim_HUST)
 
+`armor_detect` 是一个 ROS 无关的装甲检测库。在 ROS 独立的环境中完成开发与验证后，用 colcon 将其打包为静态库，以供其它 ROS 功能包直接调用。
 
-- armor_pipeline
+1. 文件结构
+    ```
+    ./src/ros_related/src/armor_detect/
+    ├── CMakeLists.txt
+    ├── include
+    │   └── armor_detect
+    │       ├── armor
+    │       │   ├── armorPad.h      # 装甲板类头文件
+    │       │   ├── armorParam.h    # 装甲板识别参数头文件
+    │       │   ├── detector.h      # 装甲板识别类头文件
+    │       │   ├── lightBar.h      # 灯条类头文件
+    │       │   └── numClassifier.h # 数字识别类头文件
+    │       └── utils
+    │           ├── timer.h # 计时器头文件，定义了时间结构体与一个 RAII 计时器类
+    │           └── utils.h # 定义了全局调试 flags 与其它常用的函数
+    ├── package.xml
+    └── src
+        ├── armor
+        │   ├── armorPad.cpp
+        │   ├── armorParam.cpp
+        │   ├── detector
+        │   │   ├── debugInfo.cpp # 装甲板识别类调试信息源文件
+        │   │   └── detect.cpp    # 装甲板识别类识别函数源文件
+        │   ├── lightBar.cpp
+        │   └── numClassifier.cpp
+        └── utils
+            └── utils.cpp
+    ```
+2. 装甲板识别流程<br/>
+  `armor_detect` 的装甲板识别基本参照吉林大学 2020 年识别方案，并进行了一些改动与调整，以期实现更稳定与快速的识别。
+
+    __*图像预处理：*__
+
+    预处理的目标是把原始 BGR 帧转换为只保留“敌方灯条”像素的二值掩码，以便后续轮廓拟合与灯条检测。`detect.cpp` 的 [`preprocess()`](./src/ros_related/src/armor_detect/src/armor/detector/detect.cpp#L42) 函数实现了图像预处理，它对对每个像素根据颜色分量差值（ R-B / B-R ）与亮度阈值判断，满足条件就把对应二值图像像素置 255；像素遍历用 `cv::parallel_for_()` 并行加速。
+
+    __*灯条识别：*__
+    
+    `detect.cpp` 的 [`detectLights()`](./src/ros_related/src/armor_detect/src/armor/detector/detect.cpp#L123) 函数实现了灯条识别。它先对预处理后得到的二值掩膜进行外部轮廓检测 ( `cv::findContours()` )。筛除过小的轮廓后，使用 `cv::fitEllipse()` 进行椭圆拟合来获得旋转矩阵 `cv::RotatedRect`，然后计算该轮廓的密实度(即是否相对笔直)，若密实度满足条件则利用获得的旋转矩阵构造灯条实例 `armor::LightBar`。在过滤掉倾角过大以及宽高比不再阈值内的灯条后，按照灯条中心从左到右排序。轮廓遍历用 `cv::parallel_for_()` 并行加速。
+
+    __*装甲板匹配：*__
+
+    `detect.cpp` 的 [`detectArmors()`](./src/ros_related/src/armor_detect/src/armor/detector/detect.cpp#L191) 函数实现了装甲板识别，它通过对已检测到的灯条两两配对生成候选装甲。
+    
+    `detectArmors()` 按照灯条横向顺序两重循环尝试配对，并在横向距离比超过阈值时提前跳出内循环以剪枝不合理配对。它对每个候选用 ArmorPad 的一系列几何约束（长宽比、角度差、长度差比、偏角与位置比等）判断其是否合适，合格的候选会记录左右索引并用分类器在原图上识别数字赋值后加入结果列表。随后调用去重逻辑  `moveRepeatArmors()`，对应冲突的匹配，它总保留水平偏角更小的那一个。
+
+    __*数字识别：*__
+    `armor_detect` 的数字识别基本参照华中科技大学 2022 年的识别方案，具体实现在 [`numClassifier.cpp`](./src/ros_related/src/armor_detect/src/armor/numClassifier.cpp) 中。
+
+    `armor::numClassifier` 利用匹配好的装甲板的顶点与长宽来获得装甲板在原图中 ROI 大小与位置，并进行裁切。通过 `cv::warpPerspective()` 将 ROI 进行仿射变换，然后将变换后的 ROI 图像缩放到目标尺寸，将其转换为灰度图并进行 Gamma 校正。对处理过的灰度图计算 HOG 描述子，把获得的描述子向量转换为单行 `cv::Mat` 矩阵后投入预训练的 SVM 模型进行识别。
+    
+- __armor_pipeline__
+  
+1. 话题的设计<br/>
+   该功能包中包含两个话题：`vid_frame` (原数据类型为 `cv::Mat`)、`playing_stat` (原数据类型为 `bool`)。前者用于传输视频帧信息，后者用于传输视频的播放状态。
+
+   `vid_frame` 传输的数据类型方式与 [3.1](#31-话题的设计) 中的 `rand_px` 完全相同。 
+
+   `playing_stat` 传输的数据类型为 `std_msgs::msg::Bool`，该类型可以直接与 `bool` 进行互相转换。
+
+<a id="design_of_params"></a>
+
+2. 参数的设计<br/>
+   `FrameCapture` 与 `ArmorFinder` 节点在构造时通过 `rclcpp::Node::declare_parameter()` 声明了可配置的参数。`FrameCapture` 声明了 `vid_path`，`playing`，`loop_display`；`ArmorFinder` 声明了 `enemy_color`，`model_path`。参数值皆可以通过 ROS2 参数接口动态设置。
+
+   `ArmorFinder` 使用 `rclcpp::Node::add_on_set_parameters_callback()` 注册回调；回调对传入参数做校验，在校验通过时立即把新配置应用到 `armor::Detector detector_`，否则返回失败并拒绝修改。
+
+   `FrameCapture` 在定时器回调中每次读取参数值并据此控制视频打开、播放与循环（改变 `vid_path` 会尝试打开新文件，失败时通过 `rclcpp::Node::set_parameter()` 回滚），并通过成员变量 `playing_stat_pub_` 发布当前播放状态。
+
+   两者通过 ROS 话题交互：`FrameCapture` 发布 `vid_frame` 与 `playing_stat`，`ArmorFinder` 订阅 `vid_frame` 获取并用 `cv_bridge` 转回 `cv::Mat` 处理，订阅 `playing_stat` 以更新本地 `is_playing_`，从而实现参数的闭环控制。
+
+- __运行效果__
+
+
+  [下载视频](./asset/vid/pipeline_test.mp4)
+
 
