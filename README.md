@@ -232,9 +232,13 @@ https://github.com/user-attachments/assets/84076adb-0769-4d0e-943d-e71d3e29beb1
 
    两者通过 ROS 话题交互：`FrameCapture` 发布 `vid_frame` 与 `playing_stat`，`ArmorFinder` 订阅 `vid_frame` 获取并用 `cv_bridge` 转回 `cv::Mat` 处理，订阅 `playing_stat` 以更新本地 `is_playing_`，从而实现参数的闭环控制。
 
+- __优化方向__
+  
+  当前的识别方案对光线相对敏感，需要前期对摄像机的各项参数进行调试，否则可能会导致装甲误识别率上升以及数字识别的失效。可以考虑对原图用不同的阈值进行双重二值化来降低曝光的影响。
+
 - __运行效果__
 
-https://github.com/user-attachments/assets/f4ff74d0-82ea-4081-9515-4c4e7632360b
+  https://github.com/user-attachments/assets/f4ff74d0-82ea-4081-9515-4c4e7632360b
 
   [下载视频](./asset/vid/pipeline_test.mp4)
 
