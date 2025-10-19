@@ -80,9 +80,9 @@
 #### 3.4 参数
 上述的两个节点没有定义任何参数，但 [`armor_pipeline`](./src/ros_related/src/armor_pipeline/) 功能包中的节点都定义了一些参数，详见 [某一节]()。<!-- TODO: finish the explanation of armor_pipline -->
 #### 3.5 运行效果
-<center>
+<p align="center">
   <img src="./asset/pic/ros_topic.png">
-</center>
+</p>
 
 ### 4. OpenCV
 #### _基础题_
@@ -91,9 +91,9 @@
 
 该程序先将原图转换为 HSV 空间，然后利用 `cv::inRange()` 获得仅保留红色块的掩膜 `cv::Mat red_mask`。对 `red_mask` 分别进行 Canny 边缘检测与外部轮廓检测（`cv::findContours()`）。过滤掉过小的轮廓后，在原图上绘制出来并对检测结果进行保存。
 - 样例检测结果：<br/>
-  <center>
+  <p align="center">
     <img src="./asset/pic/RedContours.png">
-  </center>
+  </p>
 #### 4.2 视频录制
 > source: [recoder.cpp](./src/cv_related/recorder.cpp)
 
@@ -105,9 +105,9 @@
 2. 关于摄像头：<br/>
 我使用的摄像头是笔记本内置的，故没有实现调节曝光。其它实现细节请参阅源码。
 - 录制出的视频：<br/>
-  <center>
+  <p align="center">
     <img src="./asset/vid/test.gif">
-  </center>
+  </p>
 
 #### 4.3 鼠标事件
 > source: [mouse_event.cpp](./src/cv_related/mouse_event.cpp)
@@ -131,7 +131,9 @@ https://github.com/user-attachments/assets/84076adb-0769-4d0e-943d-e71d3e29beb1
 该源码使用一个函数 `HSV_calib()`，通过创建滑条来手动确定 HSV 的大致范围。来源：[如何检测色彩边缘](https://harry-hhj.github.io/posts/RM-Tutorial-3-Getting-Started-with-OpenCV/#4%E8%A1%A5%E5%85%85%E6%A3%80%E6%B5%8B%E9%A2%9C%E8%89%B2%E8%BE%B9%E7%BC%98) 
 
 - 样例检测结果：<br>
-
+  <p align="center">
+    <img width=540 src="./asset/pic/apple_finded.png">
+  </p>
 
 #### 4.5 相机标定
 > source: [calibration.cpp](./src/cv_related/calibration.cpp)
